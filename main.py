@@ -2,66 +2,38 @@ import random
 import datetime
 
 class UserProfile:
-    """
-    Represents a user's profile with their dietary restrictions, preferences, and budget.
-    """
-    def __init__(self, dietary_restrictions=None, preferred_cuisines=None, budget=None, food_on_hand=None):
-        """
-        Initializes a UserProfile object.
+    """Represents a user's profile with dietary restrictions, preferences, and budget."""
 
-        Args:
-            dietary_restrictions (list, optional): A list of dietary restrictions (e.g., "vegetarian", "gluten-free"). Defaults to None.
-            preferred_cuisines (list, optional): A list of preferred cuisines (e.g., "Italian", "Mexican"). Defaults to None.
-            budget (float, optional): The user's weekly budget for food. Defaults to None.
-            food_on_hand (dict, optional): A dictionary representing the food the user already has (e.g., {"tomatoes": 3, "onions": 2}). Defaults to None.
-        """
+    def __init__(self, dietary_restrictions=None, preferred_cuisines=None, budget=None, food_on_hand=None):
+        """Initializes a UserProfile object."""
         self.dietary_restrictions = dietary_restrictions if dietary_restrictions is not None else []
         self.preferred_cuisines = preferred_cuisines if preferred_cuisines is not None else []
         self.budget = budget
         self.food_on_hand = food_on_hand if food_on_hand is not None else {}
 
     def update_profile(self, dietary_restrictions=None, preferred_cuisines=None, budget=None, food_on_hand=None):
-        """
-        Updates the user's profile information.
-
-        Args:
-            dietary_restrictions (list, optional): A list of dietary restrictions. Defaults to None.
-            preferred_cuisines (list, optional): A list of preferred cuisines. Defaults to None.
-            budget (float, optional): The user's weekly budget. Defaults to None.
-            food_on_hand (dict, optional): A dictionary representing the food the user already has. Defaults to None.
-        """
+        """Updates the user's profile information."""
         if dietary_restrictions is not None:
             self.dietary_restrictions = dietary_restrictions
         if preferred_cuisines is not None:
             self.preferred_cuisines = preferred_cuisines
-        if budget is not None:  # Allow budget to be set to 0
+        if budget is not None:
             self.budget = budget
         if food_on_hand is not None:
             self.food_on_hand = food_on_hand
 
     def __str__(self):
-        return (f"Dietary Restrictions: {self.dietary_restrictions or 'None'}\n"
-                f"Preferred Cuisines: {self.preferred_cuisines or 'None'}\n"
+        return (f"Dietary Restrictions: {', '.join(self.dietary_restrictions) or 'None'}\n"
+                f"Preferred Cuisines: {', '.join(self.preferred_cuisines) or 'None'}\n"
                 f"Budget: ${self.budget:.2f}" if self.budget is not None else "Budget: None\n"
                 f"Food on Hand: {self.food_on_hand or 'None'}")
 
 
 class Recipe:
-    """
-    Represents a recipe with its ingredients, instructions, and nutritional information.
-    """
-    def __init__(self, name, ingredients, instructions, cuisine, dietary_info=None, cost=None):
-        """
-        Initializes a Recipe object.
+    """Represents a recipe with its ingredients, instructions, and nutritional information."""
 
-        Args:
-            name (str): The name of the recipe.
-            ingredients (dict): A dictionary of ingredients and their quantities (e.g., {"tomatoes": "2", "onions": "1"}).
-            instructions (list): A list of instructions for preparing the recipe.
-            cuisine (str): The cuisine of the recipe (e.g., "Italian", "Mexican").
-            dietary_info (list, optional): A list of dietary information tags (e.g., "vegetarian", "gluten-free"). Defaults to None.
-            cost (float, optional): The estimated cost of the recipe. Defaults to None.
-        """
+    def __init__(self, name, ingredients, instructions, cuisine, dietary_info=None, cost=None):
+        """Initializes a Recipe object."""
         if not isinstance(ingredients, dict):
             raise TypeError("Ingredients must be a dictionary.")
         if not isinstance(instructions, list):
@@ -74,7 +46,6 @@ class Recipe:
             raise ValueError("Recipe must have at least one instruction.")
         if not cuisine:
             raise ValueError("Recipe must have a cuisine type.")
-
 
         self.name = name
         self.ingredients = ingredients
@@ -95,7 +66,7 @@ class Recipe:
             print(f"- {ingredient}: {quantity}")
         print("\nInstructions:")
         for i, step in enumerate(self.instructions):
-            print(f"{i+1}. {step}")
+            print(f"{i + 1}. {step}")
         if self.dietary_info:
             print(f"\nDietary Info: {', '.join(self.dietary_info)}")
         if self.cost:
@@ -103,16 +74,10 @@ class Recipe:
 
 
 class MealPlan:
-    """
-    Represents a meal plan for a week, including recipes for each meal.
-    """
-    def __init__(self, user_profile):
-        """
-        Initializes a MealPlan object.
+    """Represents a meal plan for a week, including recipes for each meal."""
 
-        Args:
-            user_profile (UserProfile): The user's profile.
-        """
+    def __init__(self, user_profile):
+        """Initializes a MealPlan object."""
         if not isinstance(user_profile, UserProfile):
             raise TypeError("user_profile must be a UserProfile object.")
 
@@ -128,14 +93,7 @@ class MealPlan:
         }
 
     def add_recipe(self, day, meal_type, recipe):
-        """
-        Adds a recipe to the meal plan for a specific day and meal type.
-
-        Args:
-            day (str): The day of the week (e.g., "Monday").
-            meal_type (str): The meal type (e.g., "Breakfast", "Lunch", "Dinner").
-            recipe (Recipe): The recipe to add.
-        """
+        """Adds a recipe to the meal plan for a specific day and meal type."""
         if not isinstance(recipe, Recipe):
             raise TypeError("recipe must be a Recipe object.")
 
@@ -145,25 +103,14 @@ class MealPlan:
             raise ValueError("Invalid day or meal type.")
 
     def remove_recipe(self, day, meal_type):
-        """
-        Removes a recipe from the meal plan.
-
-        Args:
-            day (str): The day of the week.
-            meal_type (str): The meal type.
-        """
+        """Removes a recipe from the meal plan."""
         if day in self.meals and meal_type in self.meals[day]:
             self.meals[day][meal_type] = None
         else:
             raise ValueError("Invalid day or meal type.")
 
     def get_shopping_list(self):
-        """
-        Generates a shopping list based on the meal plan and the user's food on hand.
-
-        Returns:
-            dict: A dictionary representing the shopping list, with ingredients and their quantities.
-        """
+        """Generates a shopping list based on the meal plan and the user's food on hand."""
         shopping_list = {}
         for day in self.meals:
             for meal_type in self.meals[day]:
@@ -173,31 +120,26 @@ class MealPlan:
                         try:
                             quantity = float(quantity)
                         except ValueError:
-                            print(f"Warning: Could not convert quantity '{quantity}' for ingredient '{ingredient}' to a number. Skipping this ingredient.")
-                            continue  # Skip this ingredient
+                            print(
+                                f"Warning: Could not convert quantity '{quantity}' for ingredient '{ingredient}' to a number. Skipping this ingredient.")
+                            continue
                         if ingredient in shopping_list:
                             shopping_list[ingredient] += quantity
                         else:
                             shopping_list[ingredient] = quantity
 
-        # Subtract ingredients the user already has
         for ingredient, quantity in self.user_profile.food_on_hand.items():
             if ingredient in shopping_list:
                 shopping_list[ingredient] -= quantity
                 if shopping_list[ingredient] <= 0:
-                    del shopping_list[ingredient]  # Remove if we have enough
+                    del shopping_list[ingredient]
             else:
-                pass # consider add if needed.
+                pass
 
-        return {k: round(v, 2) for k, v in shopping_list.items() if v > 0} # only return needed amounts, rounded
+        return {k: round(v, 2) for k, v in shopping_list.items() if v > 0}
 
     def calculate_total_cost(self):
-        """
-        Calculates the total estimated cost of the meal plan.
-
-        Returns:
-            float: The total cost of the meal plan.
-        """
+        """Calculates the total estimated cost of the meal plan."""
         total_cost = 0
         for day in self.meals:
             for meal_type in self.meals[day]:
@@ -207,9 +149,7 @@ class MealPlan:
         return round(total_cost, 2)
 
     def __str__(self):
-        """
-        Returns a string representation of the meal plan.
-        """
+        """Returns a string representation of the meal plan."""
         plan_string = ""
         for day, meals in self.meals.items():
             plan_string += f"\n--- {day} ---\n"
@@ -227,44 +167,27 @@ class MealPlan:
                 print(f"{meal_type}: ", end="")
                 if recipe:
                     print(recipe)
-                    #recipe.display_recipe() #Optionally display the full recipe
                 else:
                     print("None")
 
 
 class RecipeDatabase:
-    """
-    Manages a collection of recipes.
-    """
+    """Manages a collection of recipes."""
+
     def __init__(self):
-        """
-        Initializes a RecipeDatabase object.
-        """
+        """Initializes a RecipeDatabase object."""
         self.recipes = []
 
     def add_recipe(self, recipe):
-        """
-        Adds a recipe to the database.
-
-        Args:
-            recipe (Recipe): The recipe to add.
-        """
+        """Adds a recipe to the database."""
         if not isinstance(recipe, Recipe):
             raise TypeError("recipe must be a Recipe object.")
         self.recipes.append(recipe)
 
     def search_recipes(self, criteria=None):
-        """
-        Searches for recipes based on specified criteria.
-
-        Args:
-            criteria (dict, optional): A dictionary of search criteria (e.g., {"cuisine": "Italian", "dietary_info": "vegetarian"}). Defaults to None.
-
-        Returns:
-            list: A list of recipes that match the search criteria.
-        """
+        """Searches for recipes based on specified criteria."""
         if criteria is None:
-            return self.recipes  # Return all recipes if no criteria are specified
+            return self.recipes
 
         if not isinstance(criteria, dict):
             raise TypeError("criteria must be a dictionary.")
@@ -279,15 +202,15 @@ class RecipeDatabase:
                         match = False
                         break
                 elif key == "dietary_info":
-                    if not isinstance(value, list): #Handles searching for multiple dietary requirements
+                    if not isinstance(value, list):
                         value = [value]
                     for req in value:
                         if req.lower() not in [item.lower() for item in recipe.dietary_info]:
                             match = False
-                            break #breaks inner loop.
+                            break
                     if not match:
-                        break #breaks outer loop
-                elif key == "ingredients": #Searching by ingredients;  value should be a list.
+                        break
+                elif key == "ingredients":
                     if not isinstance(value, list):
                         raise TypeError("Ingredients criteria must be a list.")
                     for ingredient in value:
@@ -295,10 +218,9 @@ class RecipeDatabase:
                             match = False
                             break
                     if not match:
-                        break #breaks outer loop
-
+                        break
                 else:
-                    print(f"Warning: Unknown search criteria '{key}'.  Skipping.") #Handle unknown keys gracefully
+                    print(f"Warning: Unknown search criteria '{key}'.  Skipping.")
 
             if match:
                 matching_recipes.append(recipe)
@@ -313,10 +235,10 @@ class RecipeDatabase:
             return
 
         for recipe in self.recipes:
-            print(recipe) #Uses the Recipe.__str__() method
+            print(recipe)
 
     def get_recipe_by_name(self, name):
-        """Returns a recipe object given its name. Returns None if not found."""
+        """Returns a recipe object given its name."""
         for recipe in self.recipes:
             if recipe.name.lower() == name.lower():
                 return recipe
@@ -324,52 +246,47 @@ class RecipeDatabase:
 
 
 class MindfulMealPlanner:
-    """
-    Main application class for the Mindful Meal Planner.
-    """
+    """Main application class for the Mindful Meal Planner."""
+
     def __init__(self):
-        """
-        Initializes the MindfulMealPlanner application.
-        """
+        """Initializes the MindfulMealPlanner application."""
         self.user_profile = UserProfile()
         self.recipe_database = RecipeDatabase()
         self.meal_plan = MealPlan(self.user_profile)
 
     def create_sample_recipes(self):
-        """
-        Creates and adds some sample recipes to the recipe database.
-        """
+        """Creates and adds some sample recipes to the recipe database."""
         try:
             recipe1 = Recipe(
                 name="Spaghetti with Tomato Sauce",
-                ingredients={"spaghetti": "200", "tomato sauce": "500", "onion": "1", "garlic": "2"},
-                instructions=["Cook spaghetti according to package directions.", "Sauté onion and garlic in olive oil.", "Add tomato sauce and simmer for 15 minutes.", "Serve sauce over spaghetti."],
+                ingredients={"spaghetti": "200g": "200", "tomato sauce": "500g": "500", "onion": "1": "1", "garlic": "2 cloves": "2"},
+                instructions=["Cook spaghetti.", "Sauté onion and garlic.", "Add tomato sauce and simmer.", "Serve sauce over spaghetti."],
                 cuisine="Italian",
                 dietary_info=["vegetarian"],
                 cost=5.0
             )
             recipe2 = Recipe(
                 name="Chicken Tacos",
-                ingredients={"chicken breast": "300", "taco shells": "6", "lettuce": "1", "tomato": "2", "salsa": "200"},
-                instructions=["Cook chicken breast and shred.", "Fill taco shells with chicken, lettuce, tomato, and salsa."],
+                ingredients={"chicken breast": "300g": "300", "taco shells": "6": "6", "lettuce": "1 head": "1", "tomato": "2": "2", "salsa": "200g": "200"},
+                instructions=["Cook chicken and shred.", "Fill taco shells with chicken, lettuce, tomato, and salsa."],
                 cuisine="Mexican",
                 cost=8.0
             )
             recipe3 = Recipe(
                 name="Lentil Soup",
-                ingredients={"lentils": "1", "carrots": "2", "celery": "2", "vegetable broth": "6", "onion": "1"},
-                instructions=["Sauté onion, carrots, and celery in olive oil.", "Add lentils and vegetable broth.", "Simmer for 30 minutes."],
+                ingredients={"lentils": "1 cup": "1", "carrots": "2": "2", "celery": "2 stalks": "2", "vegetable broth": "6 cups": "6", "onion": "1": "1"},
+                instructions=["Sauté onion, carrots, and celery.", "Add lentils and vegetable broth.", "Simmer for 30 minutes."],
                 cuisine="Mediterranean",
                 dietary_info=["vegetarian", "vegan"],
                 cost=4.0
             )
 
             recipe4 = Recipe(
-                name = "Omelette",
-                ingredients = {"eggs": "2", "milk": "0.5", "cheese": "50", "ham": "30"},
-                instructions = ["Whisk eggs and milk", "Add cheese and ham", "Cook in pan until golden brown"],
-                cuisine = "Breakfast",
-                cost = 3.0
+                name="Omelette",
+                ingredients={"eggs": "2": "2", "milk": "0.5 cup": "0.5", "cheese": "50g": "50", "ham": "30g": "30"},
+                instructions=["Whisk eggs and milk", "Add cheese and ham", "Cook in pan until golden brown"],
+                cuisine="Breakfast",
+                cost=3.0
             )
             self.recipe_database.add_recipe(recipe1)
             self.recipe_database.add_recipe(recipe2)
@@ -383,38 +300,25 @@ class MindfulMealPlanner:
         except Exception as e:
             print(f"Unexpected error creating sample recipes: {e}")
 
-
-    def update_user_profile(self, dietary_restrictions=None, preferred_cuisines=None, budget=None, food_on_hand=None):
-        """
-        Updates the user's profile.
-
-        Args:
-            dietary_restrictions (list, optional): A list of dietary restrictions. Defaults to None.
-            preferred_cuisines (list, optional): A list of preferred cuisines. Defaults to None.
-            budget (float, optional): The user's weekly budget. Defaults to None.
-            food_on_hand (dict, optional): A dictionary representing the food the user already has. Defaults to None.
-        """
+    def update_user_profile(self, dietary_restrictions=None, preferred_cuisines=None, budget=None,
+                                food_on_hand=None):
+        """Updates the user's profile."""
         self.user_profile.update_profile(dietary_restrictions, preferred_cuisines, budget, food_on_hand)
-        self.meal_plan = MealPlan(self.user_profile)  #Recreate meal plan when profile is updated
+        self.meal_plan = MealPlan(self.user_profile)
 
     def generate_meal_plan(self):
-        """
-        Generates a meal plan based on the user's profile and the available recipes.
-
-        A more sophisticated implementation would consider dietary restrictions,
-        preferred cuisines, budget, and food on hand to create a personalized plan.
-        """
-        # First, get the recipes available, based on dietary and cuisine preferences.
+        """Generates a meal plan based on the user's profile and the available recipes."""
         search_criteria = {}
         if self.user_profile.dietary_restrictions:
             search_criteria["dietary_info"] = self.user_profile.dietary_restrictions
         if self.user_profile.preferred_cuisines:
-             search_criteria["cuisine"] = self.user_profile.preferred_cuisines
+            search_criteria["cuisine"] = self.user_profile.preferred_cuisines
 
         available_recipes = self.recipe_database.search_recipes(search_criteria)
 
         if not available_recipes:
-            print("No recipes found matching your criteria. Try changing your dietary or cuisine preferences, or adding more recipes to the database.")
+            print(
+                "No recipes found matching your criteria. Try changing your dietary or cuisine preferences, or adding more recipes to the database.")
             return
 
         days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -422,12 +326,11 @@ class MindfulMealPlanner:
 
         for day in days:
             for meal_type in meal_types:
-                # Filter recipes by dietary and cuisine preferences
                 suitable_recipes = available_recipes
 
                 if not suitable_recipes:
-                     print(f"No suitable recipes found for {day} {meal_type}.")
-                     continue #skip to the next meal
+                    print(f"No suitable recipes found for {day} {meal_type}.")
+                    continue
 
                 recipe = random.choice(suitable_recipes)
                 try:
@@ -436,34 +339,19 @@ class MindfulMealPlanner:
                     print(f"Error adding recipe: {e}")
 
     def get_meal_plan(self):
-        """
-        Returns the current meal plan.
-
-        Returns:
-            MealPlan: The current meal plan.
-        """
+        """Returns the current meal plan."""
         return self.meal_plan
 
     def get_shopping_list(self):
-        """
-        Returns the shopping list based on the current meal plan and user's food on hand.
-
-        Returns:
-            dict: A dictionary representing the shopping list.
-        """
+        """Returns the shopping list."""
         return self.meal_plan.get_shopping_list()
 
     def track_food_waste(self, day, meal_type, waste_amount):
-      """Placeholder for waste tracking feature.  Currently does nothing.
-      Args:
-          day(str): Day of the week
-          meal_type(str): Breakfast, Lunch, or Dinner
-          waste_amount(float): Amount of wasted food.
-      """
-      if not isinstance(waste_amount, (int, float)):
-          raise TypeError("Waste amount must be a number.")
-      print(f"Food Waste Tracking: On {day} for {meal_type}, waste of {waste_amount} recorded.")
-      return None
+        """Placeholder for waste tracking feature."""
+        if not isinstance(waste_amount, (int, float)):
+            raise TypeError("Waste amount must be a number.")
+        print(f"Food Waste Tracking: On {day} for {meal_type}, waste of {waste_amount} recorded.")
+        return None
 
     def add_recipe_to_meal_plan(self, day, meal_type, recipe_name):
         """Adds a specific recipe to the meal plan."""
@@ -533,33 +421,10 @@ class MindfulMealPlanner:
         """Handles the user profile update process."""
         print("\n--- Update User Profile ---")
 
-        dietary_restrictions_str = input("Enter dietary restrictions (comma-separated, e.g., vegetarian,gluten-free, or leave empty for none): ")
-        dietary_restrictions = [s.strip() for s in dietary_restrictions_str.split(",")] if dietary_restrictions_str else []
-
-        preferred_cuisines_str = input("Enter preferred cuisines (comma-separated, e.g., Italian,Mexican, or leave empty for all): ")
-        preferred_cuisines = [s.strip() for s in preferred_cuisines_str.split(",")] if preferred_cuisines_str else []
-
-        while True:
-            budget_str = input("Enter weekly budget (or leave empty for no budget): ")
-            if not budget_str:
-                budget = None
-                break
-            try:
-                budget = float(budget_str)
-                break
-            except ValueError:
-                print("Invalid budget. Please enter a number.")
-
-        food_on_hand_str = input("Enter food on hand (ingredient:quantity, comma-separated, e.g., tomatoes:2,onions:1, or leave empty): ")
-        food_on_hand = {}
-        if food_on_hand_str:
-            try:
-                for item in food_on_hand_str.split(","):
-                    ingredient, quantity = item.split(":")
-                    food_on_hand[ingredient.strip()] = float(quantity.strip())
-            except ValueError:
-                print("Invalid food on hand format. Please use ingredient:quantity format.")
-                return
+        dietary_restrictions = self._get_list_input("Enter dietary restrictions (comma-separated): ")
+        preferred_cuisines = self._get_list_input("Enter preferred cuisines (comma-separated): ")
+        budget = self._get_float_input("Enter weekly budget: ")
+        food_on_hand = self._get_food_on_hand_input()
 
         self.update_user_profile(dietary_restrictions, preferred_cuisines, budget, food_on_hand)
         print("User profile updated.")
@@ -567,8 +432,8 @@ class MindfulMealPlanner:
     def handle_add_recipe_to_meal_plan(self):
         """Handles adding a specific recipe to the meal plan."""
         print("\n--- Add Recipe to Meal Plan ---")
-        day = input("Enter day of the week (e.g., Monday): ").capitalize()
-        meal_type = input("Enter meal type (Breakfast, Lunch, Dinner): ").capitalize()
+        day = self._get_valid_day()
+        meal_type = self._get_valid_meal_type()
         recipe_name = input("Enter the name of the recipe to add: ")
 
         self.add_recipe_to_meal_plan(day, meal_type, recipe_name)
@@ -576,59 +441,52 @@ class MindfulMealPlanner:
     def handle_search_recipes(self):
         """Handles the recipe search process."""
         print("\n--- Search Recipes ---")
-        search_term = input("Enter search criteria (cuisine:value or dietary_info:value or ingredients:value1,value2): ")
-        try:
-            criteria = {}
-            if ":" in search_term:
-                key, value = search_term.split(":")
-                criteria[key.strip()] = [item.strip() for item in value.split(",")] if "," in value else value.strip()
+        print("Search by: ")
+        print("1. Cuisine")
+        print("2. Dietary Info")
+        print("3. Ingredients")
+        search_type = input("Enter search type (1-3): ")
 
-            results = self.recipe_database.search_recipes(criteria)
+        if search_type == "1":
+            cuisine = input("Enter cuisine: ")
+            criteria = {"cuisine": cuisine}
+        elif search_type == "2":
+            dietary_info = self._get_list_input("Enter dietary info (comma-separated): ")
+            criteria = {"dietary_info": dietary_info}
+        elif search_type == "3":
+            ingredients = self._get_list_input("Enter ingredients (comma-separated): ")
+            criteria = {"ingredients": ingredients}
+        else:
+            print("Invalid search type.")
+            return
 
-            if results:
-                print("\n--- Search Results ---")
-                for recipe in results:
-                    print(recipe)
-                    #recipe.display_recipe() #Optionally show full recipe details
-            else:
-                print("No recipes found matching your criteria.")
-        except Exception as e:
-            print(f"Invalid search criteria: {e}")
+        results = self.recipe_database.search_recipes(criteria)
 
+        if results:
+            print("\n--- Search Results ---")
+            for recipe in results:
+                print(recipe)
+        else:
+            print("No recipes found matching your criteria.")
 
     def handle_track_food_waste(self):
         """Handles tracking food waste."""
         print("\n--- Track Food Waste ---")
-        day = input("Enter day of the week: ").capitalize()
-        meal_type = input("Enter meal type (Breakfast, Lunch, Dinner): ").capitalize()
-        while True:
-            try:
-                waste_amount = float(input("Enter amount of food wasted (in grams or similar unit): "))
-                self.track_food_waste(day, meal_type, waste_amount)
-                break
-            except ValueError:
-                print("Invalid waste amount. Please enter a number.")
+        day = self._get_valid_day()
+        meal_type = self._get_valid_meal_type()
+        waste_amount = self._get_float_input("Enter amount of food wasted (in grams): ")
+        self.track_food_waste(day, meal_type, waste_amount)
 
     def handle_add_new_recipe(self):
         """Handles adding a new recipe to the database."""
         print("\n--- Add New Recipe ---")
         try:
             name = input("Enter recipe name: ")
-            ingredients_str = input("Enter ingredients (ingredient:quantity, comma-separated): ")
-            ingredients = {}
-            for item in ingredients_str.split(","):
-                ingredient, quantity = item.split(":")
-                ingredients[ingredient.strip()] = quantity.strip()
-
-            instructions_str = input("Enter instructions (step-by-step, comma-separated): ")
-            instructions = [s.strip() for s in instructions_str.split(",")]
-
+            ingredients = self._get_ingredients_input()
+            instructions = self._get_list_input("Enter instructions (step-by-step, comma-separated): ")
             cuisine = input("Enter cuisine type: ")
-            dietary_info_str = input("Enter dietary info (comma-separated, or leave empty): ")
-            dietary_info = [s.strip() for s in dietary_info_str.split(",")] if dietary_info_str else []
-
-            cost_str = input("Enter estimated cost (or leave empty): ")
-            cost = float(cost_str) if cost_str else None
+            dietary_info = self._get_list_input("Enter dietary info (comma-separated, or leave empty): ")
+            cost = self._get_float_input("Enter estimated cost (or leave empty): ")
 
             new_recipe = Recipe(name, ingredients, instructions, cuisine, dietary_info, cost)
             self.recipe_database.add_recipe(new_recipe)
@@ -641,11 +499,73 @@ class MindfulMealPlanner:
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
+    def _get_list_input(self, prompt):
+        """Helper function to get a comma-separated list from the user."""
+        input_str = input(prompt)
+        return [s.strip() for s in input_str.split(",")] if input_str else []
+
+    def _get_float_input(self, prompt):
+        """Helper function to get a float from the user with error handling."""
+        while True:
+            input_str = input(prompt)
+            if not input_str:
+                return None
+            try:
+                return float(input_str)
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+
+    def _get_food_on_hand_input(self):
+        """Helper function to get food on hand information from the user."""
+        food_on_hand = {}
+        while True:
+            item = input("Enter food on hand (ingredient:quantity, or type 'done'): ")
+            if item.lower() == 'done':
+                break
+            try:
+                ingredient, quantity = item.split(":")
+                food_on_hand[ingredient.strip()] = float(quantity.strip())
+            except ValueError:
+                print("Invalid format. Please use ingredient:quantity.")
+        return food_on_hand
+
+    def _get_ingredients_input(self):
+        """Helper function to get ingredients from the user."""
+        ingredients = {}
+        while True:
+            item = input("Enter ingredient and quantity (ingredient:quantity, or type 'done'): ")
+            if item.lower() == 'done':
+                break
+            try:
+                ingredient, quantity = item.split(":")
+                ingredients[ingredient.strip()] = quantity.strip()
+            except ValueError:
+                print("Invalid format. Please use ingredient:quantity.")
+        return ingredients
+
+    def _get_valid_day(self):
+        """Helper function to get a valid day of the week from the user."""
+        valid_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        while True:
+            day = input("Enter day of the week (e.g., Monday): ").capitalize()
+            if day in valid_days:
+                return day
+            else:
+                print("Invalid day. Please enter a valid day of the week.")
+
+    def _get_valid_meal_type(self):
+        """Helper function to get a valid meal type from the user."""
+        valid_meal_types = ["Breakfast", "Lunch", "Dinner"]
+        while True:
+            meal_type = input("Enter meal type (Breakfast, Lunch, Dinner): ").capitalize()
+            if meal_type in valid_meal_types:
+                return meal_type
+            else:
+                print("Invalid meal type. Please enter Breakfast, Lunch, or Dinner.")
+
 
 def main():
-    """
-    Main function to demonstrate the Mindful Meal Planner application.
-    """
+    """Main function to demonstrate the Mindful Meal Planner application."""
     planner = MindfulMealPlanner()
     planner.run()
 
