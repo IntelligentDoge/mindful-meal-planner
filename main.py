@@ -40,10 +40,10 @@ class UserProfile:
             self.food_on_hand = food_on_hand
 
     def __str__(self):
-        return (f"Dietary Restrictions: {self.dietary_restrictions}\n"
-                f"Preferred Cuisines: {self.preferred_cuisines}\n"
-                f"Budget: {self.budget}\n"
-                f"Food on Hand: {self.food_on_hand}")
+        return (f"Dietary Restrictions: {self.dietary_restrictions or 'None'}\n"
+                f"Preferred Cuisines: {self.preferred_cuisines or 'None'}\n"
+                f"Budget: ${self.budget:.2f}" if self.budget is not None else "Budget: None\n"
+                f"Food on Hand: {self.food_on_hand or 'None'}")
 
 
 class Recipe:
@@ -66,6 +66,15 @@ class Recipe:
             raise TypeError("Ingredients must be a dictionary.")
         if not isinstance(instructions, list):
             raise TypeError("Instructions must be a list.")
+        if not name:
+            raise ValueError("Recipe name cannot be empty.")
+        if not ingredients:
+            raise ValueError("Recipe must have at least one ingredient.")
+        if not instructions:
+            raise ValueError("Recipe must have at least one instruction.")
+        if not cuisine:
+            raise ValueError("Recipe must have a cuisine type.")
+
 
         self.name = name
         self.ingredients = ingredients
@@ -330,41 +339,50 @@ class MindfulMealPlanner:
         """
         Creates and adds some sample recipes to the recipe database.
         """
-        recipe1 = Recipe(
-            name="Spaghetti with Tomato Sauce",
-            ingredients={"spaghetti": "200", "tomato sauce": "500", "onion": "1", "garlic": "2"},
-            instructions=["Cook spaghetti according to package directions.", "Sauté onion and garlic in olive oil.", "Add tomato sauce and simmer for 15 minutes.", "Serve sauce over spaghetti."],
-            cuisine="Italian",
-            dietary_info=["vegetarian"],
-            cost=5.0
-        )
-        recipe2 = Recipe(
-            name="Chicken Tacos",
-            ingredients={"chicken breast": "300", "taco shells": "6", "lettuce": "1", "tomato": "2", "salsa": "200"},
-            instructions=["Cook chicken breast and shred.", "Fill taco shells with chicken, lettuce, tomato, and salsa."],
-            cuisine="Mexican",
-            cost=8.0
-        )
-        recipe3 = Recipe(
-            name="Lentil Soup",
-            ingredients={"lentils": "1", "carrots": "2", "celery": "2", "vegetable broth": "6", "onion": "1"},
-            instructions=["Sauté onion, carrots, and celery in olive oil.", "Add lentils and vegetable broth.", "Simmer for 30 minutes."],
-            cuisine="Mediterranean",
-            dietary_info=["vegetarian", "vegan"],
-            cost=4.0
-        )
+        try:
+            recipe1 = Recipe(
+                name="Spaghetti with Tomato Sauce",
+                ingredients={"spaghetti": "200", "tomato sauce": "500", "onion": "1", "garlic": "2"},
+                instructions=["Cook spaghetti according to package directions.", "Sauté onion and garlic in olive oil.", "Add tomato sauce and simmer for 15 minutes.", "Serve sauce over spaghetti."],
+                cuisine="Italian",
+                dietary_info=["vegetarian"],
+                cost=5.0
+            )
+            recipe2 = Recipe(
+                name="Chicken Tacos",
+                ingredients={"chicken breast": "300", "taco shells": "6", "lettuce": "1", "tomato": "2", "salsa": "200"},
+                instructions=["Cook chicken breast and shred.", "Fill taco shells with chicken, lettuce, tomato, and salsa."],
+                cuisine="Mexican",
+                cost=8.0
+            )
+            recipe3 = Recipe(
+                name="Lentil Soup",
+                ingredients={"lentils": "1", "carrots": "2", "celery": "2", "vegetable broth": "6", "onion": "1"},
+                instructions=["Sauté onion, carrots, and celery in olive oil.", "Add lentils and vegetable broth.", "Simmer for 30 minutes."],
+                cuisine="Mediterranean",
+                dietary_info=["vegetarian", "vegan"],
+                cost=4.0
+            )
 
-        recipe4 = Recipe(
-            name = "Omelette",
-            ingredients = {"eggs": "2", "milk": "0.5", "cheese": "50", "ham": "30"},
-            instructions = ["Whisk eggs and milk", "Add cheese and ham", "Cook in pan until golden brown"],
-            cuisine = "Breakfast",
-            cost = 3.0
-        )
-        self.recipe_database.add_recipe(recipe1)
-        self.recipe_database.add_recipe(recipe2)
-        self.recipe_database.add_recipe(recipe3)
-        self.recipe_database.add_recipe(recipe4)
+            recipe4 = Recipe(
+                name = "Omelette",
+                ingredients = {"eggs": "2", "milk": "0.5", "cheese": "50", "ham": "30"},
+                instructions = ["Whisk eggs and milk", "Add cheese and ham", "Cook in pan until golden brown"],
+                cuisine = "Breakfast",
+                cost = 3.0
+            )
+            self.recipe_database.add_recipe(recipe1)
+            self.recipe_database.add_recipe(recipe2)
+            self.recipe_database.add_recipe(recipe3)
+            self.recipe_database.add_recipe(recipe4)
+            print("Sample recipes created and added.")
+        except ValueError as e:
+            print(f"Error creating sample recipes: {e}")
+        except TypeError as e:
+            print(f"Type Error while creating sample recipes: {e}")
+        except Exception as e:
+            print(f"Unexpected error creating sample recipes: {e}")
+
 
     def update_user_profile(self, dietary_restrictions=None, preferred_cuisines=None, budget=None, food_on_hand=None):
         """
@@ -461,6 +479,7 @@ class MindfulMealPlanner:
 
     def run(self):
         """Runs the main application loop."""
+        self.create_sample_recipes()
         while True:
             print("\n--- Mindful Meal Planner ---")
             print("1. Update User Profile")
@@ -471,7 +490,8 @@ class MindfulMealPlanner:
             print("6. View All Recipes")
             print("7. Search Recipes")
             print("8. Track Food Waste")
-            print("9. Exit")
+            print("9. Add New Recipe")
+            print("0. Exit")
 
             choice = input("Enter your choice: ")
 
@@ -500,6 +520,8 @@ class MindfulMealPlanner:
                 elif choice == "8":
                     self.handle_track_food_waste()
                 elif choice == "9":
+                    self.handle_add_new_recipe()
+                elif choice == "0":
                     print("Exiting...")
                     break
                 else:
@@ -511,19 +533,24 @@ class MindfulMealPlanner:
         """Handles the user profile update process."""
         print("\n--- Update User Profile ---")
 
-        dietary_restrictions_str = input("Enter dietary restrictions (comma-separated, e.g., vegetarian,gluten-free): ")
-        dietary_restrictions = [s.strip() for s in dietary_restrictions_str.split(",")] if dietary_restrictions_str else None
+        dietary_restrictions_str = input("Enter dietary restrictions (comma-separated, e.g., vegetarian,gluten-free, or leave empty for none): ")
+        dietary_restrictions = [s.strip() for s in dietary_restrictions_str.split(",")] if dietary_restrictions_str else []
 
-        preferred_cuisines_str = input("Enter preferred cuisines (comma-separated, e.g., Italian,Mexican): ")
-        preferred_cuisines = [s.strip() for s in preferred_cuisines_str.split(",")] if preferred_cuisines_str else None
+        preferred_cuisines_str = input("Enter preferred cuisines (comma-separated, e.g., Italian,Mexican, or leave empty for all): ")
+        preferred_cuisines = [s.strip() for s in preferred_cuisines_str.split(",")] if preferred_cuisines_str else []
 
-        try:
-            budget = float(input("Enter weekly budget: ")) if input("Enter weekly budget: ") else None
-        except ValueError:
-            print("Invalid budget. Please enter a number.")
-            return
+        while True:
+            budget_str = input("Enter weekly budget (or leave empty for no budget): ")
+            if not budget_str:
+                budget = None
+                break
+            try:
+                budget = float(budget_str)
+                break
+            except ValueError:
+                print("Invalid budget. Please enter a number.")
 
-        food_on_hand_str = input("Enter food on hand (ingredient:quantity, comma-separated, e.g., tomatoes:2,onions:1): ")
+        food_on_hand_str = input("Enter food on hand (ingredient:quantity, comma-separated, e.g., tomatoes:2,onions:1, or leave empty): ")
         food_on_hand = {}
         if food_on_hand_str:
             try:
@@ -540,8 +567,8 @@ class MindfulMealPlanner:
     def handle_add_recipe_to_meal_plan(self):
         """Handles adding a specific recipe to the meal plan."""
         print("\n--- Add Recipe to Meal Plan ---")
-        day = input("Enter day of the week (e.g., Monday): ")
-        meal_type = input("Enter meal type (Breakfast, Lunch, Dinner): ")
+        day = input("Enter day of the week (e.g., Monday): ").capitalize()
+        meal_type = input("Enter meal type (Breakfast, Lunch, Dinner): ").capitalize()
         recipe_name = input("Enter the name of the recipe to add: ")
 
         self.add_recipe_to_meal_plan(day, meal_type, recipe_name)
@@ -572,20 +599,54 @@ class MindfulMealPlanner:
     def handle_track_food_waste(self):
         """Handles tracking food waste."""
         print("\n--- Track Food Waste ---")
-        day = input("Enter day of the week: ")
-        meal_type = input("Enter meal type (Breakfast, Lunch, Dinner): ")
+        day = input("Enter day of the week: ").capitalize()
+        meal_type = input("Enter meal type (Breakfast, Lunch, Dinner): ").capitalize()
+        while True:
+            try:
+                waste_amount = float(input("Enter amount of food wasted (in grams or similar unit): "))
+                self.track_food_waste(day, meal_type, waste_amount)
+                break
+            except ValueError:
+                print("Invalid waste amount. Please enter a number.")
+
+    def handle_add_new_recipe(self):
+        """Handles adding a new recipe to the database."""
+        print("\n--- Add New Recipe ---")
         try:
-            waste_amount = float(input("Enter amount of food wasted (in grams or similar unit): "))
-            self.track_food_waste(day, meal_type, waste_amount)
-        except ValueError:
-            print("Invalid waste amount. Please enter a number.")
+            name = input("Enter recipe name: ")
+            ingredients_str = input("Enter ingredients (ingredient:quantity, comma-separated): ")
+            ingredients = {}
+            for item in ingredients_str.split(","):
+                ingredient, quantity = item.split(":")
+                ingredients[ingredient.strip()] = quantity.strip()
+
+            instructions_str = input("Enter instructions (step-by-step, comma-separated): ")
+            instructions = [s.strip() for s in instructions_str.split(",")]
+
+            cuisine = input("Enter cuisine type: ")
+            dietary_info_str = input("Enter dietary info (comma-separated, or leave empty): ")
+            dietary_info = [s.strip() for s in dietary_info_str.split(",")] if dietary_info_str else []
+
+            cost_str = input("Enter estimated cost (or leave empty): ")
+            cost = float(cost_str) if cost_str else None
+
+            new_recipe = Recipe(name, ingredients, instructions, cuisine, dietary_info, cost)
+            self.recipe_database.add_recipe(new_recipe)
+            print(f"Recipe '{name}' added successfully.")
+
+        except ValueError as e:
+            print(f"Invalid input: {e}")
+        except TypeError as e:
+            print(f"Type error: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+
 
 def main():
     """
     Main function to demonstrate the Mindful Meal Planner application.
     """
     planner = MindfulMealPlanner()
-    planner.create_sample_recipes()
     planner.run()
 
 
