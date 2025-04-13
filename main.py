@@ -234,8 +234,8 @@ class RecipeDatabase:
             print("No recipes in the database.")
             return
 
-        for recipe in self.recipes:
-            print(recipe)
+        for i, recipe in enumerate(self.recipes):
+            print(f"{i+1}. {recipe}")
 
     def get_recipe_by_name(self, name):
         """Returns a recipe object given its name."""
@@ -243,6 +243,13 @@ class RecipeDatabase:
             if recipe.name.lower() == name.lower():
                 return recipe
         return None
+
+    def get_recipe_by_index(self, index):
+        """Returns a recipe object given its index in the list."""
+        try:
+            return self.recipes[index]
+        except IndexError:
+            return None
 
 
 class MindfulMealPlanner:
@@ -259,7 +266,7 @@ class MindfulMealPlanner:
         try:
             recipe1 = Recipe(
                 name="Spaghetti with Tomato Sauce",
-                ingredients={"spaghetti": "200g": "200", "tomato sauce": "500g": "500", "onion": "1": "1", "garlic": "2 cloves": "2"},
+                ingredients={"spaghetti": "200g", "tomato sauce": "500g", "onion": "1", "garlic": "2 cloves"},
                 instructions=["Cook spaghetti.", "Sauté onion and garlic.", "Add tomato sauce and simmer.", "Serve sauce over spaghetti."],
                 cuisine="Italian",
                 dietary_info=["vegetarian"],
@@ -267,14 +274,14 @@ class MindfulMealPlanner:
             )
             recipe2 = Recipe(
                 name="Chicken Tacos",
-                ingredients={"chicken breast": "300g": "300", "taco shells": "6": "6", "lettuce": "1 head": "1", "tomato": "2": "2", "salsa": "200g": "200"},
+                ingredients={"chicken breast": "300g", "taco shells": "6", "lettuce": "1 head", "tomato": "2", "salsa": "200g"},
                 instructions=["Cook chicken and shred.", "Fill taco shells with chicken, lettuce, tomato, and salsa."],
                 cuisine="Mexican",
                 cost=8.0
             )
             recipe3 = Recipe(
                 name="Lentil Soup",
-                ingredients={"lentils": "1 cup": "1", "carrots": "2": "2", "celery": "2 stalks": "2", "vegetable broth": "6 cups": "6", "onion": "1": "1"},
+                ingredients={"lentils": "1 cup", "carrots": "2", "celery": "2 stalks", "vegetable broth": "6 cups", "onion": "1"},
                 instructions=["Sauté onion, carrots, and celery.", "Add lentils and vegetable broth.", "Simmer for 30 minutes."],
                 cuisine="Mediterranean",
                 dietary_info=["vegetarian", "vegan"],
@@ -283,7 +290,7 @@ class MindfulMealPlanner:
 
             recipe4 = Recipe(
                 name="Omelette",
-                ingredients={"eggs": "2": "2", "milk": "0.5 cup": "0.5", "cheese": "50g": "50", "ham": "30g": "30"},
+                ingredients={"eggs": "2", "milk": "0.5 cup", "cheese": "50g", "ham": "30g"},
                 instructions=["Whisk eggs and milk", "Add cheese and ham", "Cook in pan until golden brown"],
                 cuisine="Breakfast",
                 cost=3.0
@@ -329,7 +336,7 @@ class MindfulMealPlanner:
                 suitable_recipes = available_recipes
 
                 if not suitable_recipes:
-                    print(f"No suitable recipes found for {day} {meal_type}.")
+                    self.meal_plan.add_recipe(day, meal_type, None) # Set to None if no recipe is found
                     continue
 
                 recipe = random.choice(suitable_recipes)
@@ -353,17 +360,16 @@ class MindfulMealPlanner:
         print(f"Food Waste Tracking: On {day} for {meal_type}, waste of {waste_amount} recorded.")
         return None
 
-    def add_recipe_to_meal_plan(self, day, meal_type, recipe_name):
+    def add_recipe_to_meal_plan(self, day, meal_type, recipe):
         """Adds a specific recipe to the meal plan."""
-        recipe = self.recipe_database.get_recipe_by_name(recipe_name)
         if recipe:
             try:
                 self.meal_plan.add_recipe(day, meal_type, recipe)
-                print(f"Successfully added {recipe_name} to {day} {meal_type}.")
+                print(f"Successfully added {recipe.name} to {day} {meal_type}.")
             except ValueError as e:
                 print(f"Error adding recipe: {e}")
         else:
-            print(f"Recipe '{recipe_name}' not found in the database.")
+            print(f"Recipe not found in the database.")
 
     def run(self):
         """Runs the main application loop."""
@@ -374,11 +380,12 @@ class MindfulMealPlanner:
             print("2. Generate Meal Plan")
             print("3. View Meal Plan")
             print("4. Get Shopping List")
-            print("5. Add Recipe to Meal Plan")
-            print("6. View All Recipes")
-            print("7. Search Recipes")
-            print("8. Track Food Waste")
-            print("9. Add New Recipe")
+            print("5. Add Recipe to Meal Plan (by name)")
+            print("6. Add Recipe to Meal Plan (by list index)")
+            print("7. View All Recipes")
+            print("8. Search Recipes")
+            print("9. Track Food Waste")
+            print("10. Add New Recipe")
             print("0. Exit")
 
             choice = input("Enter your choice: ")
@@ -400,14 +407,16 @@ class MindfulMealPlanner:
                     else:
                         print("Shopping list is empty.")
                 elif choice == "5":
-                    self.handle_add_recipe_to_meal_plan()
+                    self.handle_add_recipe_to_meal_plan_by_name()
                 elif choice == "6":
-                    self.recipe_database.display_all_recipes()
+                    self.handle_add_recipe_to_meal_plan_by_index()
                 elif choice == "7":
-                    self.handle_search_recipes()
+                    self.recipe_database.display_all_recipes()
                 elif choice == "8":
-                    self.handle_track_food_waste()
+                    self.handle_search_recipes()
                 elif choice == "9":
+                    self.handle_track_food_waste()
+                elif choice == "10":
                     self.handle_add_new_recipe()
                 elif choice == "0":
                     print("Exiting...")
@@ -421,22 +430,42 @@ class MindfulMealPlanner:
         """Handles the user profile update process."""
         print("\n--- Update User Profile ---")
 
-        dietary_restrictions = self._get_list_input("Enter dietary restrictions (comma-separated): ")
-        preferred_cuisines = self._get_list_input("Enter preferred cuisines (comma-separated): ")
-        budget = self._get_float_input("Enter weekly budget: ")
+        dietary_restrictions = self._get_list_input("Enter dietary restrictions (comma-separated, e.g., vegetarian, gluten-free): ")
+        preferred_cuisines = self._get_list_input("Enter preferred cuisines (comma-separated, e.g., Italian, Mexican): ")
+        budget = self._get_float_input("Enter weekly budget (or leave blank for no budget): ")
         food_on_hand = self._get_food_on_hand_input()
 
         self.update_user_profile(dietary_restrictions, preferred_cuisines, budget, food_on_hand)
         print("User profile updated.")
 
-    def handle_add_recipe_to_meal_plan(self):
-        """Handles adding a specific recipe to the meal plan."""
-        print("\n--- Add Recipe to Meal Plan ---")
+    def handle_add_recipe_to_meal_plan_by_name(self):
+        """Handles adding a specific recipe to the meal plan by name."""
+        print("\n--- Add Recipe to Meal Plan (by name) ---")
         day = self._get_valid_day()
         meal_type = self._get_valid_meal_type()
         recipe_name = input("Enter the name of the recipe to add: ")
 
-        self.add_recipe_to_meal_plan(day, meal_type, recipe_name)
+        recipe = self.recipe_database.get_recipe_by_name(recipe_name)
+        self.add_recipe_to_meal_plan(day, meal_type, recipe)
+
+    def handle_add_recipe_to_meal_plan_by_index(self):
+        """Handles adding a specific recipe to the meal plan by index."""
+        print("\n--- Add Recipe to Meal Plan (by list index) ---")
+        day = self._get_valid_day()
+        meal_type = self._get_valid_meal_type()
+
+        self.recipe_database.display_all_recipes()  # Display recipes with indices
+        while True:
+            try:
+                recipe_index = int(input("Enter the index of the recipe to add: ")) - 1  # Adjust for 0-based indexing
+                recipe = self.recipe_database.get_recipe_by_index(recipe_index)
+                if recipe:
+                    break
+                else:
+                    print("Invalid recipe index. Please try again.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+        self.add_recipe_to_meal_plan(day, meal_type, recipe)
 
     def handle_search_recipes(self):
         """Handles the recipe search process."""
@@ -445,7 +474,8 @@ class MindfulMealPlanner:
         print("1. Cuisine")
         print("2. Dietary Info")
         print("3. Ingredients")
-        search_type = input("Enter search type (1-3): ")
+        print("0. Back to Main Menu")  # Added option to go back
+        search_type = input("Enter search type (1-3, or 0 to go back): ")
 
         if search_type == "1":
             cuisine = input("Enter cuisine: ")
@@ -456,6 +486,8 @@ class MindfulMealPlanner:
         elif search_type == "3":
             ingredients = self._get_list_input("Enter ingredients (comma-separated): ")
             criteria = {"ingredients": ingredients}
+        elif search_type == "0":
+            return  # Go back to the main menu
         else:
             print("Invalid search type.")
             return
@@ -464,8 +496,8 @@ class MindfulMealPlanner:
 
         if results:
             print("\n--- Search Results ---")
-            for recipe in results:
-                print(recipe)
+            for i, recipe in enumerate(results):
+                print(f"{i+1}. {recipe}")
         else:
             print("No recipes found matching your criteria.")
 
@@ -475,7 +507,10 @@ class MindfulMealPlanner:
         day = self._get_valid_day()
         meal_type = self._get_valid_meal_type()
         waste_amount = self._get_float_input("Enter amount of food wasted (in grams): ")
-        self.track_food_waste(day, meal_type, waste_amount)
+        if waste_amount is not None:
+            self.track_food_waste(day, meal_type, waste_amount)
+        else:
+            print("Food waste tracking cancelled.")
 
     def handle_add_new_recipe(self):
         """Handles adding a new recipe to the database."""
@@ -509,7 +544,7 @@ class MindfulMealPlanner:
         while True:
             input_str = input(prompt)
             if not input_str:
-                return None
+                return None  # Allows skipping the input
             try:
                 return float(input_str)
             except ValueError:
@@ -518,8 +553,9 @@ class MindfulMealPlanner:
     def _get_food_on_hand_input(self):
         """Helper function to get food on hand information from the user."""
         food_on_hand = {}
+        print("Enter your food on hand (ingredient:quantity). Type 'done' when finished.")
         while True:
-            item = input("Enter food on hand (ingredient:quantity, or type 'done'): ")
+            item = input("Enter item (or 'done'): ")
             if item.lower() == 'done':
                 break
             try:
@@ -532,8 +568,9 @@ class MindfulMealPlanner:
     def _get_ingredients_input(self):
         """Helper function to get ingredients from the user."""
         ingredients = {}
+        print("Enter ingredients and quantities (ingredient:quantity). Type 'done' when finished.")
         while True:
-            item = input("Enter ingredient and quantity (ingredient:quantity, or type 'done'): ")
+            item = input("Enter item (or 'done'): ")
             if item.lower() == 'done':
                 break
             try:
